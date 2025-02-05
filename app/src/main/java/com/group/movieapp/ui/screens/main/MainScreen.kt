@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -159,10 +160,20 @@ private fun BodyItem(
 ) {
     LazyColumn(
         modifier = modifier
-
     ) {
         item {
-            Spacer(modifier = Modifier.height(0.1f.dpFromScreenHeight()))
+            Box(modifier = Modifier
+                .height(0.1f.dpFromScreenHeight())
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent, // Start transparent
+                            Color.Black.copy(alpha = 0.8f) // Fade to semi-transparent black
+                        ),
+                    )
+                )
+            )
         }
         items((uiState as MovieUIState.Success).movies.take(10)) { movie ->
             ContentItem(
@@ -178,6 +189,14 @@ private fun BodyItem(
 fun ContentItem(movie: Movie, onClick: (Movie) -> Unit = {}) {
     Card(
         modifier = Modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color.Black.copy(0.8f),
+                        Color.Black
+                    )
+                )
+            )
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
