@@ -1,7 +1,5 @@
 package com.group.movieapp.ui.screens.main
 
-import android.util.Log
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -13,18 +11,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -46,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,9 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ErrorResult
 import coil.request.ImageRequest
-import coil.request.SuccessResult
+import com.group.movieapp.ui.components.IconButtonComponent
 import com.group.movieapp.ui.components.ScaffoldComponent
 import com.group.movieapp.ui.data.model.Movie
 import com.group.movieapp.utils.AnimatedScale
@@ -69,7 +73,10 @@ import kotlinx.coroutines.launch
 fun MainScreen(viewmodel: MainViewmodel = viewModel()) {
     ScaffoldComponent { paddingValues ->
         Surface {
-            Box(modifier = Modifier.padding(paddingValues)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
                 MovieListScreen(viewmodel)
             }
         }
@@ -131,11 +138,7 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
                 ) {
                     HeaderItem(clickedMovieCard.value, isExpanded)
 
-                    BodyItem(
-                        modifier = Modifier.offset(
-                            y = (0.5f).dpFromScreenHeight()
-                        ), uiState
-                    ) { movie ->
+                    BodyItem(uiState = uiState) { movie ->
                         clickedMovieCard.value = movie
                         isExpanded.value = !isExpanded.value
                     }
@@ -154,27 +157,25 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
 
 @Composable
 private fun BodyItem(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     uiState: MovieUIState,
     action: (Movie) -> Unit = {}
 ) {
-    LazyColumn(
+    Column(
         modifier = modifier
+            .offset(y = (0.5f).dpFromScreenHeight())
     ) {
-        item {
-            Box(modifier = Modifier
-                .height(0.1f.dpFromScreenHeight())
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent, // Start transparent
-                            Color.Black.copy(alpha = 0.8f) // Fade to semi-transparent black
-                        ),
-                    )
-                )
-            )
-        }
+        MovieActionButtons()
+        MovieList(uiState, action)
+    }
+}
+
+@Composable
+private fun MovieList(
+    uiState: MovieUIState,
+    action: (Movie) -> Unit
+) {
+    LazyColumn {
         items((uiState as MovieUIState.Success).movies.take(10)) { movie ->
             ContentItem(
                 movie = movie,
@@ -182,6 +183,102 @@ private fun BodyItem(
             )
         }
     }
+}
+
+@Composable
+private fun MovieActionButtons() {
+    Box(
+        modifier = Modifier
+            .height(0.15f.dpFromScreenHeight())
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent, // Start transparent
+                        Color.Black.copy(alpha = 0.8f) // Fade to semi-transparent black
+                    ),
+                )
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 8.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            AddToFavoritesAction(modifier = Modifier.weight(1f))
+            PlayAction(modifier = Modifier.weight(1f))
+            MoreInfoAction(modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun AddToFavoritesAction(modifier: Modifier = Modifier) {
+    IconButtonComponent(
+        modifier = modifier, icon = {
+            Icon(
+                modifier = Modifier
+                    .size(30.dp),
+                imageVector = Icons.Filled.FavoriteBorder,
+                contentDescription = null,
+                tint = Color.White
+            )
+        },
+        label = "Add to favorites"
+    )
+}
+
+@Composable
+private fun PlayAction(modifier: Modifier = Modifier) {
+    IconButtonComponent(
+        modifier = modifier, icon = {
+            Surface (
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(end = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(40.dp),
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+
+                    Text(
+                        "Play",
+                        modifier = Modifier.wrapContentWidth(),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        },
+        label = ""
+    )
+}
+
+@Composable
+private fun MoreInfoAction(modifier: Modifier = Modifier) {
+    IconButtonComponent(
+        modifier = modifier, icon = {
+            Icon(
+                modifier = Modifier
+                    .size(30.dp),
+                imageVector = Icons.Outlined.Info,
+                contentDescription = null,
+                tint = Color.White
+            )
+        },
+        label = "More Info"
+    )
 }
 
 
@@ -222,7 +319,7 @@ fun HeaderItem(clickedMovieCard: Movie?, isExpanded: MutableState<Boolean>) {
             )
             AnimatedScale(
                 targetScale = 1.2f,
-                durationMillis = 500,
+                durationMillis = 10000,
                 animationTrigger = isExpanded.value,
                 easing = FastOutSlowInEasing
             ) { scale ->

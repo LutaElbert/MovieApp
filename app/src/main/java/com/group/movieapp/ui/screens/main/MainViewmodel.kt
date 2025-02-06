@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group.movieapp.ui.data.model.Movie
-import com.group.movieapp.ui.data.repository.MovieRepository
 import com.group.movieapp.ui.data.usecase.GetPopularMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,18 +26,17 @@ class MainViewmodel @Inject constructor(private val useCase: GetPopularMoviesUse
         fetchPopularMovies("9be1ee60d5728453f1977de553d81b86")
     }
 
-    private fun fetchPopularMovies(apiKey: String) {
+    private fun fetchPopularMovies(accessKey: String) {
         viewModelScope.launch {
             try {
-                val response = useCase.invoke(apiKey, 1)
+                val moviesResponse = useCase.invoke(accessKey, 1)
 
-                _movies.value = response.movies
-                _firstMovie.value = response.movies.first()
-                Log.d("tae", firstMovie.value?.imageUrl.toString())
+                _movies.value = moviesResponse.movies
+                _firstMovie.value = moviesResponse.movies.first()
 
                 _uiState.value = MovieUIState.Success(movies.value)
-            } catch (e: Exception) {
-                _uiState.value = MovieUIState.Error("Failed to fetch movies: ${e.message}")
+            } catch (exception: Exception) {
+                _uiState.value = MovieUIState.Error("Failed to fetch movies: ${exception.message}")
             }
         }
     }
