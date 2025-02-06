@@ -11,13 +11,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,8 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -95,8 +95,17 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
     Box {
         when (uiState) {
             is MovieUIState.Loading -> {
-                Column {
-                    Row {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Card(
                             modifier = Modifier.size(150.dp),
                             border = BorderStroke(
@@ -104,17 +113,22 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
                                 Brush.horizontalGradient(listOf(Color.Green, Color.Yellow))
                             )
                         ) {
-                            Column {
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(100.dp),
-                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .align(Alignment.Center),
+                                    color = Color.Black,
                                     strokeCap = StrokeCap.Round
                                 )
 
                                 Text(
-                                    "Loading...",
+                                    modifier = Modifier.align(Alignment.Center),
+                                    text = "Loading...",
                                     style = MaterialTheme.typography.bodyLarge
-                                        .copy(color = Color.Gray)
+                                        .copy(color = Color.Black)
                                 )
                             }
                         }
@@ -138,7 +152,12 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
                 ) {
                     HeaderItem(clickedMovieCard.value, isExpanded)
 
-                    BodyItem(uiState = uiState) { movie ->
+                    BodyItem(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .fillMaxHeight(0.5f)
+                            .safeContentPadding(),
+                        uiState = uiState) { movie ->
                         clickedMovieCard.value = movie
                         isExpanded.value = !isExpanded.value
                     }
@@ -163,19 +182,23 @@ private fun BodyItem(
 ) {
     Column(
         modifier = modifier
-            .offset(y = (0.5f).dpFromScreenHeight())
+            .wrapContentHeight()
     ) {
         MovieActionButtons()
-        MovieList(uiState, action)
+        MovieList(modifier = Modifier.weight(1f),uiState, action)
     }
 }
 
 @Composable
 private fun MovieList(
+    modifier: Modifier = Modifier,
     uiState: MovieUIState,
     action: (Movie) -> Unit
 ) {
-    LazyColumn {
+    LazyColumn(
+        modifier = modifier
+            .wrapContentHeight()
+    ) {
         items((uiState as MovieUIState.Success).movies.take(10)) { movie ->
             ContentItem(
                 movie = movie,
@@ -183,6 +206,8 @@ private fun MovieList(
             )
         }
     }
+
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 @Composable
