@@ -1,6 +1,5 @@
 package com.group.movieapp.ui.screens.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group.movieapp.ui.data.model.Movie
@@ -16,9 +15,9 @@ class MainViewmodel @Inject constructor(private val useCase: GetPopularMoviesUse
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     private val movies: StateFlow<List<Movie>> = _movies
 
-    val _uiState = MutableStateFlow<MovieUIState>(MovieUIState.Loading)
+    val networkState = MutableStateFlow<MovieUIState>(MovieUIState.Loading)
 
-    var _firstMovie = MutableStateFlow<Movie?>(null)
+    private var _firstMovie = MutableStateFlow<Movie?>(null)
     val firstMovie: StateFlow<Movie?> = _firstMovie
 
 
@@ -34,12 +33,14 @@ class MainViewmodel @Inject constructor(private val useCase: GetPopularMoviesUse
                 _movies.value = moviesResponse.movies
                 _firstMovie.value = moviesResponse.movies.first()
 
-                _uiState.value = MovieUIState.Success(movies.value)
+                networkState.value = MovieUIState.Success(movies.value)
             } catch (exception: Exception) {
-                _uiState.value = MovieUIState.Error("Failed to fetch movies: ${exception.message}")
+                networkState.value = MovieUIState.Error("Failed to fetch movies: ${exception.message}")
             }
         }
     }
+
+    fun getFirstMovie(): Movie? = _firstMovie.value
 }
 
 sealed class MovieUIState {

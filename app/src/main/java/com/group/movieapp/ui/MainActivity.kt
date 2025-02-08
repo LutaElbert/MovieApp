@@ -2,19 +2,22 @@ package com.group.movieapp.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
-import com.group.movieapp.ui.screens.main.MainScreen
+import androidx.lifecycle.lifecycleScope
+import com.group.movieapp.ui.data.model.Movie
+import com.group.movieapp.ui.screens.details.DetailsScreen
+import com.group.movieapp.ui.screens.details.DetailsViewmodel
 import com.group.movieapp.ui.screens.main.MainViewmodel
 import com.group.movieapp.ui.theme.MovieAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,8 +27,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieAppTheme {
+                val firstMovie = rememberSaveable() { mutableStateOf<Movie?>(null) }
                 val viewModel: MainViewmodel by viewModels()
-                MainScreen(viewModel)
+                val detailsViewModel: DetailsViewmodel by viewModels()
+//                MainScreen(viewModel)
+
+                LaunchedEffect(Unit) {
+                    lifecycleScope.launch {
+                        firstMovie.value = viewModel.getFirstMovie()
+                    }
+                }
+
+                DetailsScreen(
+                    mainViewmodel = viewModel,
+                    detailsViewmodel = detailsViewModel
+                )
             }
         }
     }
@@ -40,6 +56,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     MovieAppTheme {
-        MainScreen()
+//        DetailsScreen()
     }
 }

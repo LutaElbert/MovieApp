@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
@@ -85,7 +84,7 @@ fun MainScreen(viewmodel: MainViewmodel = viewModel()) {
 
 @Composable
 fun MovieListScreen(viewmodel: MainViewmodel) {
-    val uiState by viewmodel._uiState.collectAsState()
+    val uiState by viewmodel.networkState.collectAsState()
     val scope = rememberCoroutineScope()
     val clickedMovieCard = rememberSaveable { mutableStateOf<Movie?>(null) }
 
@@ -139,7 +138,7 @@ fun MovieListScreen(viewmodel: MainViewmodel) {
             is MovieUIState.Success -> {
                 LaunchedEffect(true) {
                     scope.launch {
-                        viewmodel._firstMovie.collect {
+                        viewmodel.firstMovie.collect {
                             clickedMovieCard.value = it
                         }
                     }
@@ -358,15 +357,6 @@ fun HeaderItem(clickedMovieCard: Movie?, isExpanded: MutableState<Boolean>) {
                 )
             }
         }
-
-//        Text(
-//            clickedMovieCard?.title ?: "",
-//            modifier = Modifier
-//                .align(Alignment.BottomCenter)
-//                .padding(16.dp),
-//            style = MaterialTheme.typography.headlineMedium
-//                .copy(Color.White, letterSpacing = 4.sp)
-//        )
     }
 }
 
