@@ -22,12 +22,13 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun ScaffoldComponent(
+    modifier: Modifier = Modifier,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val navController = rememberNavController()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             //TopAppBarComponent()
         },

@@ -1,11 +1,10 @@
 package com.group.movieapp.ui.screens.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group.movieapp.ui.data.model.Movie
-import com.group.movieapp.ui.data.repository.MovieRepository
 import com.group.movieapp.ui.data.usecase.GetPopularMoviesUseCase
+import com.group.movieapp.ui.data.network.ApiConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,31 +16,32 @@ class MainViewmodel @Inject constructor(private val useCase: GetPopularMoviesUse
     private val _movies = MutableStateFlow<List<Movie>>(emptyList())
     private val movies: StateFlow<List<Movie>> = _movies
 
-    val _uiState = MutableStateFlow<MovieUIState>(MovieUIState.Loading)
+    val networkState = MutableStateFlow<MovieUIState>(MovieUIState.Loading)
 
-    var _firstMovie = MutableStateFlow<Movie?>(null)
+    private var _firstMovie = MutableStateFlow<Movie?>(null)
     val firstMovie: StateFlow<Movie?> = _firstMovie
 
 
     init {
-        fetchPopularMovies("9be1ee60d5728453f1977de553d81b86")
+        fetchPopularMovies(ApiConfig.API_KEY)
     }
 
-    private fun fetchPopularMovies(apiKey: String) {
+    private fun fetchPopularMovies(accessKey: String) {
         viewModelScope.launch {
             try {
-                val response = useCase.invoke(apiKey, 1)
+                val moviesResponse = useCase.invoke(accessKey, 1)
 
-                _movies.value = response.movies
-                _firstMovie.value = response.movies.first()
-                Log.d("tae", firstMovie.value?.imageUrl.toString())
+                _movies.value = moviesResponse.movies
+                _firstMovie.value = moviesResponse.movies.first()
 
-                _uiState.value = MovieUIState.Success(movies.value)
-            } catch (e: Exception) {
-                _uiState.value = MovieUIState.Error("Failed to fetch movies: ${e.message}")
+                networkState.value = MovieUIState.Success(movies.value)
+            } catch (exception: Exception) {
+                networkState.value = MovieUIState.Error("Failed to fetch movies: ${exception.message}")
             }
         }
     }
+
+    fun getFirstMovie(): Movie? = _firstMovie.value
 }
 
 sealed class MovieUIState {
