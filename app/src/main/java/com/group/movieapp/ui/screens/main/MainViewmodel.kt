@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.group.movieapp.ui.data.model.Movie
 import com.group.movieapp.ui.data.usecase.GetPopularMoviesUseCase
+import com.group.movieapp.ui.data.network.ApiConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,7 @@ class MainViewmodel @Inject constructor(private val useCase: GetPopularMoviesUse
 
 
     init {
-        fetchPopularMovies("9be1ee60d5728453f1977de553d81b86")
+        fetchPopularMovies(ApiConfig.API_KEY)
     }
 
     private fun fetchPopularMovies(accessKey: String) {

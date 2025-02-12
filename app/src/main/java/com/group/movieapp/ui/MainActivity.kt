@@ -14,10 +14,12 @@ import androidx.lifecycle.lifecycleScope
 import com.group.movieapp.ui.data.model.Movie
 import com.group.movieapp.ui.screens.details.DetailsScreen
 import com.group.movieapp.ui.screens.details.DetailsViewmodel
+import com.group.movieapp.ui.screens.main.MainScreen
 import com.group.movieapp.ui.screens.main.MainViewmodel
 import com.group.movieapp.ui.theme.MovieAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -30,7 +32,7 @@ class MainActivity : ComponentActivity() {
                 val firstMovie = rememberSaveable() { mutableStateOf<Movie?>(null) }
                 val viewModel: MainViewmodel by viewModels()
                 val detailsViewModel: DetailsViewmodel by viewModels()
-//                MainScreen(viewModel)
+                MainScreen(viewModel)
 
                 LaunchedEffect(Unit) {
                     lifecycleScope.launch {
@@ -38,10 +40,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                DetailsScreen(
-                    mainViewmodel = viewModel,
-                    detailsViewmodel = detailsViewModel
-                )
+//                DetailsScreen(
+//                    mainViewmodel = viewModel,
+//                    detailsViewmodel = detailsViewModel
+//                )
             }
         }
     }
