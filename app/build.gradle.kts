@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,10 +21,26 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties()
+        if (rootProject.file("local.properties").exists()) {
+            properties.load(rootProject.file("local.properties").inputStream())
+        }
+        val API_KEY = properties.getProperty("MOVIE_API_KEY")
+        buildConfigField("String", "API_KEY", "\"${API_KEY}\"")
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3\"")
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
         release {
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -39,6 +57,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
